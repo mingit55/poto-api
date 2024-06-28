@@ -1,0 +1,28 @@
+{
+  "name": "poto-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/app.js",
+  "scripts": {
+    "dev": "nodemon src/app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mingit55/poto-api.git"
+  },
+  "author": "potoreuka",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mingit55/poto-api/issues"
+  },
+  "homepage": "https://github.com/mingit55/poto-api#readme",
+  "dependencies": {
+    "axios": "^1.7.2",
+    "body-parser": "^1.20.2",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "nodemon": "^3.1.4",
+    "twit": "^2.2.11"
+  }
+}
