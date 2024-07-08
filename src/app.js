@@ -10,6 +10,9 @@ __srcname = path.resolve(__dirname);
 const app = express();
 app.use(bodyParser.json());
 
+const blockStoragePath = process.env.BLOCK_STORAGE_PATH;
+app.use("/static", express.static(blockStoragePath));
+
 const middleware = require("./middlewares");
 middleware.init(app);
 
