@@ -2,6 +2,7 @@ const { Router } = require("express");
 const router = Router();
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const { authMiddleware } = require("../middlewares/auth.middleware");
 
 router.post("/login", async (req, res) => {
   const { userId, password } = req.body;
@@ -76,33 +77,8 @@ router.post("/join", async (request, response) => {
   }
 });
 
-router.get("/check", async (req, res) => {
-  const token = req.cookies["ACCESS_TOKEN"];
-
-  if (!token) {
-    return res.json({ success: false, message: "Token not found" });
-  }
-
-  const check = new Promise((res, rej) => {
-    jwt.verify(token, process.env.JWT_SECRET, (err, payload) => {
-      if (err) {
-        rej(err);
-      } else {
-        res(payload);
-      }
-    });
-  });
-
-  check
-    .then((payload) => {
-      res.status(200).json({ success: true, data: payload });
-    })
-    .catch((error) => {
-      res.status(403).json({
-        success: false,
-        message: error.message,
-      });
-    });
+router.get("/check", authMiddleware, async (req, res) => {
+  res.status(200).json({ success: true, data: req.user });
 });
 
 module.exports = router;
