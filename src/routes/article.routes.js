@@ -14,7 +14,8 @@ router.post(
   authMiddleware,
   upload.array("images", 20),
   async (req, res) => {
-    const { title, descript, photoAt, model, link } = req.body;
+    const { title, descript, photoAt, model, link, level, photoType, locale } =
+      req.body;
 
     const files = req.files.map((file, i) => {
       const filename =
@@ -46,8 +47,8 @@ router.post(
     let article;
     try {
       const [res] = await _db.execute(
-        "INSERT INTO articles (title, descript, photoAt, model, link) VALUES (?,?,?,?,?)",
-        [title, descript, photoAt, model, link]
+        "INSERT INTO articles (title, descript, photoAt, model, link, level, photoType, locale) VALUES (?,?,?,?,?,?,?,?)",
+        [title, descript, photoAt, model, link, level, photoType, locale]
       );
 
       [article] = await _db.query("SELECT * FROM articles WHERE id =?", [
@@ -156,7 +157,8 @@ router.put(
   upload.array("images", 20),
   async (req, res) => {
     const id = req.params.id;
-    const { title, descript, photoAt, model, link } = req.body;
+    const { title, descript, photoAt, model, link, level, photoType, locale } =
+      req.body;
     const deletedImages = JSON.parse(req.body.deletedImages);
 
     try {
@@ -241,8 +243,8 @@ router.put(
 
     try {
       await _db.execute(
-        "UPDATE articles SET title =?, descript =?, photoAt =?, model =?, link =? WHERE id =?",
-        [title, descript, photoAt, model, link, id]
+        "UPDATE articles SET title =?, descript =?, photoAt =?, model =?, link =?, level= ?, photoType= ?, locale= ? WHERE id =?",
+        [title, descript, photoAt, model, link, level, photoType, locale, id]
       );
     } catch (err) {
       console.error(err);
