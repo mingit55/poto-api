@@ -6,7 +6,6 @@ const fs = require("fs");
 const { authMiddleware } = require("../middlewares/auth.middleware");
 
 const blockStoragePath = process.env.BLOCK_STORAGE_PATH;
-
 const upload = multer({ dest: path.resolve(__srcname + "/uploads") });
 
 router.post(

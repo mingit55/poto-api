@@ -9,6 +9,7 @@ router.get("/", (req, res) => {
   });
 });
 router.use("/auth", require("./auth.routes"));
-router.use('/articles', require('./article.routes'));
+router.use("/articles", require("./article.routes"));
+router.use("/shares", require("./share.routes"));
 
 module.exports = router;

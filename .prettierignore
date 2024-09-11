@@ -1,0 +1,35 @@
+# dependencies
+node_modules
+
+# logs
+npm-debug.log
+
+# Nuxt build
+.nuxt
+
+# Nuxt generate
+dist
+
+# JetBrain config
+.idea
+
+# VS Code config
+.vscode
+
+
+# eslint modify for indent
+.eslintrc.js
+
+# mac os
+.DS_Store
+
+# node virtual enviroment
+.nvmrc
+
+# pwa ignore
+sw.*
+
+# CodeceptJS
+output
+
+e2e/

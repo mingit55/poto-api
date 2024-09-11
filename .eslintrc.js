@@ -1,0 +1,42 @@
+module.exports = {
+  root: true,
+  env: {
+    browser: true,
+    node: true,
+  },
+  extends: [
+    'eslint:recommended',
+    'plugin:nuxt/recommended',
+    'plugin:vue/recommended',
+    'plugin:prettier/recommended',
+    // '@nuxt/eslint-config',
+  ],
+  rules: {
+    'vue/component-definition-name-casing': 0,
+    'vue/multi-word-component-names': 0,
+    'vue/no-v-html': 0,
+    'vue/html-indent': 0,
+    'vue/max-attributes-per-line': 'off',
+    'vue/singleline-html-element-content-newline': 0,
+    'vue/html-closing-bracket-newline': 0,
+    'vue/html-self-closing': 0,
+    'no-unused-vars': 2,
+    'no-empty': 2,
+    'no-extra-semi': 2,
+    'no-undef': 0,
+    semi: ['error', 'always'],
+    'comma-dangle': ['warn', 'always-multiline'],
+    'new-cap': ['off', { newIsCap: true }],
+    'no-lonely-if': 'off',
+    'semi-spacing': 2,
+    'semi-style': ['error', 'last'],
+    camelcase: 'off',
+    'vue/require-component-is': 'off',
+    'prettier/prettier': [
+      'error',
+      {
+        endOfLine: 'auto',
+      },
+    ],
+  },
+};
