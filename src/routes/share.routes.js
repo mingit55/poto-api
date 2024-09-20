@@ -34,6 +34,7 @@ router.get('/', authMiddleware, async (req, res) => {
       success: false,
       message: '게시물 목록 조회 실패',
     });
+    return;
   }
 });
 
@@ -72,6 +73,7 @@ router.get('/:id', async (req, res) => {
       success: false,
       message: '대상을 찾을 수 없습니다.',
     });
+    return;
   }
 });
 
@@ -162,6 +164,41 @@ router.post(
   },
 );
 
+router.delete('/:id', authMiddleware, async (req, res) => {
+  const id = req.params.id;
+
+  try {
+    const [rows] = await _db.query('SELECT * FROM shares WHERE id = ?', [
+      id,
+    ]);
+    if (rows.length === 0) {
+      throw new Error();
+    }
+  } catch (err) {
+    console.info(err);
+    res.json({
+      success: false,
+      message: '해당 공유 링크를 찾을 수 없습니다.',
+    });
+    return;
+  }
+
+  try {
+    await _db.query('DELETE FROM shares WHERE id = ?', [id]);
+  } catch (err) {
+    console.info(err);
+    res.json({
+      success: false,
+      message: '해당 공유 링크를 삭제할 수 없습니다.',
+    });
+    return;
+  }
+
+  res.json({
+    success: true,
+  });
+});
+
 router.post('/:id/thumbs', async (req, res) => {
   const id = req.params.id;
   const { id: imageId, isPass } = req.body;
@@ -180,6 +217,7 @@ router.post('/:id/thumbs', async (req, res) => {
       success: false,
       message: '해당 이미지를 찾을 수 없습니다.',
     });
+    return;
   }
 
   try {
@@ -193,11 +231,12 @@ router.post('/:id/thumbs', async (req, res) => {
       success: false,
       message: '업데이트 중 문제가 발생했습니다.',
     });
+    return;
   }
 
   res.json({
     success: true,
-  })
+  });
 });
 
 module.exports = router;
