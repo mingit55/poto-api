@@ -17,12 +17,14 @@ exports.POTO_GUIDE_LINE = `
         Region: Seoul
       
       Example Output:
-      {
-        "recommended_location": "Yeouido Park, Seoul",
-        "suggested_visit_date": "Monday, 25th, 7 PM",
-        "google_maps_url": "https://maps.app.goo.gl/abcdefg",
-        "description": "Yeouido Park offers stunning night views. The riverside promenade is especially beautiful, perfect for capturing sunset photos. Monday, 25th is predicted to be clear, making it an ideal day for photography."
-      }
+      [
+        {
+          "location_name": "여의도 공원",
+          "location_address": "서울 영등포구 여의도동 여의공원로 68",
+          "description": "여의도 공원은 멋진 야경을 선사합니다. 강변 산책로는 특히 일몰 사진을 찍기에 완벽한 아름다운 곳입니다. "
+        }
+        ... (And two other things)
+      ]
       
       Additional Considerations:
         Flexibility: The model should be able to handle various user queries, such as \"quiet cafe for reading\" or \"dog-friendly park.\"
@@ -33,6 +35,7 @@ exports.POTO_GUIDE_LINE = `
 
      Error Guide:
         If an error occurs, fill each item with null and print it out.
+        If the correct address cannot be retrieved, remove it from the array.
       
       Key points:
         Clear and concise instructions.
@@ -43,50 +46,52 @@ exports.POTO_GUIDE_LINE = `
   .replaceAll('\n', '');
 
 exports.LOCATION_MAP = {
-  실내: [
-    '빈티지 스타일 카페',
-    '모던 스타일 카페',
-    '테마 카페',
-    '미술관',
-    '과학관',
-    '역사 박물관',
-    '쇼핑몰',
-    '컨셉 스토어',
-    '도심 전망 라운지',
-    '호텔 라운지',
-    '도서관',
-    '실내 정원',
+  Indoor: [
+    { name: '빈티지 스타일 카페', value: 'Vintage style cafe' },
+    { name: '모던 스타일 카페', value: 'Modern style cafe' },
+    { name: '테마 카페', value: 'Themed cafe' },
+    { name: '미술관', value: 'Art museum' },
+    { name: '과학관', value: 'Science Museum' },
+    { name: '역사 박물관', value: 'History Museu' },
+    { name: '쇼핑몰', value: 'Shopping mall' },
+    { name: '컨셉 스토어', value: 'Concept Store' },
+    { name: '도심 전망 라운지', value: 'City view lounge' },
+    { name: '호텔 라운지', value: 'Hotel lounge' },
+    { name: '도서관', value: 'Library' },
+    { name: '실내 정원', value: 'Indoor garden' },
   ],
-  야외: [
-    '도시 공원',
-    '식물원',
-    '자연 생태 공원',
-    '고궁 및 전통 건축물',
-    '유명 랜드마크',
-    '유적지',
-    '바닷가',
-    '강변 산책로',
-    '호수 근처',
-    '등산로',
-    '야생화 군락지',
-    '폭포 및 계곡',
-    '전망대',
-    '농장 및 목장',
-    '캠핑장',
-    '유원지',
+  Outdoor: [
+    { name: '도시 공원', value: 'an urban park' },
+    { name: '식물원', value: 'a botanical garden' },
+    { name: '자연 생태 공원', value: 'a natural ecological park' },
+    {
+      name: '고궁 및 전통 건축물',
+      value: 'Old Palace and Traditional Buildings',
+    },
+    { name: '유명 랜드마크', value: 'a famous landmark' },
+    { name: '유적지', value: 'Historical site' },
+    { name: '바닷가', value: 'the beach' },
+    { name: '강변 산책로', value: 'a riverside promenade' },
+    { name: '호수 근처', value: 'near a lake' },
+    { name: '등산로', value: 'a hiking trail' },
+    { name: '야생화 군락지', value: 'a wildflower colony' },
+    { name: '폭포 및 계곡', value: 'Waterfalls and valleys' },
+    { name: '전망대', value: 'Observatory' },
+    { name: '농장 및 목장', value: 'Farms and Ranchs' },
+    { name: '캠핑장', value: 'Campground' },
+    { name: '유원지', value: 'Amusement park' },
   ],
-  스튜디오: [
-    '빈티지 테마',
-    '미니멀리즘 테마',
-    '판타지 테마',
-    '제품 촬영용',
-    '패션 촬영용',
-    '아티스트 작업실',
-    '크로마키',
-    '자연광',
-    '댄스 및 퍼포먼스',
-    '유튜브 및 스트리밍',
-    '영화 및 영상 제작',
+  Studio: [
+    { name: '빈티지 테마', value: 'a vintage theme' },
+    { name: '미니멀리즘 테마', value: 'minimalist theme' },
+    { name: '판타지 테마', value: 'fantasy theme' },
+    { name: '제품 촬영용', value: 'For product shooting' },
+    { name: '패션 촬영용', value: 'For fashion shoots' },
+    { name: '아티스트 작업실', value: "an artist's studio" },
+    { name: '크로마키', value: 'Chroma key' },
+    { name: '자연광', value: 'natural light' },
+    { name: '댄스 및 퍼포먼스', value: 'Dance and Performance' },
+    { name: '유튜브 및 스트리밍', value: 'YouTube and Streaming' },
+    { name: '영화 및 영상 제작', value: 'Film and video production' },
   ],
 };
-

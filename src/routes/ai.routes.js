@@ -34,7 +34,7 @@ router.post('/request', async (req, res) => {
   } catch (err) {
     res.json({
       success: false,
-      message: '올바른 검색 결과를 찾을 수 없습니다.',
+      message: '연관된 장소를 찾을 수 없습니다.',
     });
     return;
   }
