@@ -1,18 +1,20 @@
+const { GoogleAuth } = require('google-auth-library');
 const { VertexAI } = require('@google-cloud/vertexai');
-const { POTO_GUIDE_LINE } = require('./constant/ai')
+const { POTO_GUIDE_LINE } = require('./constant/ai');
 
-// Initialize Vertex with your Cloud project and location
-const authOptions = {
-  credentials: {
-    client_email: process.env.GOOGLE_CLIENT_EMAIL,
-    private_key: process.env.GOOGLE_API_KEY,
-  }
-}
+const fs = require('fs');
+const path = require('path');
+const gKeyFilePath = path.resolve(__dirname, '..', 'g-key-file.json');
+fs.writeFileSync(gKeyFilePath, process.env.GOOGLE_KEY_CONTENT);
 
+const auth = new GoogleAuth({
+  keyFile: gKeyFilePath,
+  scopes: 'https://www.googleapis.com/auth/cloud-platform',
+});
 const vertex_ai = new VertexAI({
   project: 'endless-bolt-441206-r1',
   location: 'us-central1',
-  googleAuthOptions: authOptions,
+  googleAuthOptions: auth,
 });
 const model = 'gemini-1.5-pro-002';
 
