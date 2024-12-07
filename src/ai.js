@@ -2,9 +2,17 @@ const { VertexAI } = require('@google-cloud/vertexai');
 const { POTO_GUIDE_LINE } = require('./constant/ai')
 
 // Initialize Vertex with your Cloud project and location
+const authOptions = {
+  credentials: {
+    client_email: process.env.GOOGLE_CLIENT_EMAIL,
+    private_key: process.env.GOOGLE_API_KEY,
+  }
+}
+
 const vertex_ai = new VertexAI({
   project: 'endless-bolt-441206-r1',
   location: 'us-central1',
+  googleAuthOptions: authOptions,
 });
 const model = 'gemini-1.5-pro-002';
 
