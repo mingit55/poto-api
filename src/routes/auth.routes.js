@@ -7,9 +7,10 @@ const { authMiddleware } = require("../middlewares/auth.middleware");
 router.post("/login", async (req, res) => {
   const { userId, password } = req.body;
   const [user] = await _db.execute(
-    "SELECT id, userId, password FROM users where userId = ?",
+    "SELECT id, userId, password FROM users where userId = $1",
     [userId]
   );
+  console.info(user);
 
   if (!user) {
     res.json({
@@ -17,7 +18,7 @@ router.post("/login", async (req, res) => {
       message: "해당 아이디의 회원을 찾을 수 없습니다.",
     });
     return;
-  } else if (!bcrypt.compareSync(password, user[0].password)) {
+  } else if (!bcrypt.compareSync(password, user.password)) {
     res.json({
       success: false,
       message: "비밀번호가 일치하지 않습니다.",
@@ -25,9 +26,9 @@ router.post("/login", async (req, res) => {
     return;
   }
 
-  delete user[0].password;
+  delete user.password;
 
-  const token = jwt.sign(user[0], process.env.JWT_SECRET, {
+  const token = jwt.sign(user, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRESIN,
   });
   res.cookie("ACCESS_TOKEN", token, {
@@ -36,7 +37,7 @@ router.post("/login", async (req, res) => {
     sameSite: "none",
     secure: true,
   });
-  res.json({ success: true, data: user[0] });
+  res.json({ success: true, data: user });
 });
 
 router.post("/join", async (request, response) => {
@@ -52,14 +53,14 @@ router.post("/join", async (request, response) => {
 
   try {
     console.info(userId, bcrypt.hashSync(password));
-    const [res] = await _db.query(
-      "INSERT INTO users (userId, password) VALUES (?,?)",
+    const res = await _db.query(
+      "INSERT INTO users (userId, password) VALUES ($1, $2)",
       [userId, bcrypt.hashSync(password)]
     );
 
-    const id = res.insertId;
-    const [res2] = await _db.execute(
-      "SELECT id, userId FROM users WHERE id = ?",
+    const id = res[0].id;
+    const res2 = await _db.execute(
+      "SELECT id, userId FROM users WHERE id = $1",
       [id]
     );
     response.json({

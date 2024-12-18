@@ -15,10 +15,10 @@ router.get('/', authMiddleware, async (req, res) => {
   const startIdx = (page - 1) * pageSize;
 
   try {
-    const [rows] = await _db.query(
-      `SELECT * FROM shares ORDER BY id DESC LIMIT ${startIdx}, ${pageSize}`,
+    const rows = await _db.query(
+      `SELECT * FROM shares ORDER BY id DESC LIMIT ${pageSize} OFFSET ${startIdx}`,
     );
-    const [cntRows] = await _db.query('SELECT COUNT(*) as cnt FROM shares');
+    const cntRows= await _db.query('SELECT COUNT(*) as cnt FROM shares');
 
     res.json({
       success: true,
@@ -42,14 +42,14 @@ router.get('/:id', async (req, res) => {
   let id = req.params.id;
 
   try {
-    const [rows] = await _db.query(`SELECT * FROM shares WHERE id = ?`, [id]);
+    const rows = await _db.query(`SELECT * FROM shares WHERE id = $1`, [id]);
     if (!rows || rows.length === 0) {
       throw new Error();
     }
     const row = rows[0];
 
-    const [images] = await _db.query(
-      `SELECT * FROM share_photos WHERE shareId = ?`,
+    const images = await _db.query(
+      `SELECT * FROM share_photos WHERE shareId = $1`,
       [id],
     );
 
@@ -114,12 +114,11 @@ router.post(
     let share;
     let id = Math.random().toString(36).slice(-10);
     try {
-      const [res] = await _db.execute('INSERT INTO shares (id) VALUES (?)', [
+      await _db.execute('INSERT INTO shares (id) VALUES ($1)', [
         id,
       ]);
 
-      [share] = await _db.query('SELECT * FROM shares WHERE id = ?', [id]);
-      share = share[0];
+      [share] = await _db.query('SELECT * FROM shares WHERE id = $1', [id]);
     } catch (err) {
       console.error(err);
       res.status(500).send({
@@ -135,13 +134,13 @@ router.post(
         files.map(
           async (file, i) =>
             await _db.execute(
-              'INSERT INTO share_photos (shareId, imageName, originalName) VALUES (?, ?, ?)',
+              'INSERT INTO share_photos (shareId, imageName, originalName) VALUES ($1, $2, $3)',
               [share.id, file.filename, file.originalName],
             ),
         ),
       );
-      const [list] = await _db.query(
-        'SELECT * FROM article_photos WHERE articleId = ?',
+      const list = await _db.query(
+        'SELECT * FROM article_photos WHERE articleId = $1',
         [share.id],
       );
       photos = list;
@@ -168,7 +167,7 @@ router.delete('/:id', authMiddleware, async (req, res) => {
   const id = req.params.id;
 
   try {
-    const [rows] = await _db.query('SELECT * FROM shares WHERE id = ?', [
+    const rows = await _db.query('SELECT * FROM shares WHERE id = $1', [
       id,
     ]);
     if (rows.length === 0) {
@@ -184,7 +183,7 @@ router.delete('/:id', authMiddleware, async (req, res) => {
   }
 
   try {
-    await _db.query('DELETE FROM shares WHERE id = ?', [id]);
+    await _db.query('DELETE FROM shares WHERE id = $1', [id]);
   } catch (err) {
     console.info(err);
     res.json({
@@ -204,8 +203,8 @@ router.post('/:id/thumbs', async (req, res) => {
   const { id: imageId, isPass } = req.body;
 
   try {
-    const [rows] = await _db.query(
-      'SELECT * FROM share_photos WHERE id = ? AND shareId = ?',
+    const rows = await _db.query(
+      'SELECT * FROM share_photos WHERE id = $1 AND shareId = $2',
       [imageId, id],
     );
     if (rows.length === 0) {
