@@ -1,5 +1,5 @@
 const fs = require('fs');
-const { uploader } = require('../cloudinary');
+const { uploader, upload } = require('../cloudinary');
 const blockStoragePath = process.env.BLOCK_STORAGE_PATH;
 
 exports.getList = async (req, res) => {
@@ -89,13 +89,13 @@ exports.createShare = async (req, res) => {
   let photos;
   try {
     await Promise.all(
-      req.files.map(
-        async (file) =>
-          await _db.execute(
-            'INSERT INTO share_photos (share_id, image_path, original_name) VALUES ($1, $2, $3)',
-            [share.id, file.path, file.originalname],
-          ),
-      ),
+      req.files.map(async (file) => {
+        const result = await upload(file);
+        await _db.execute(
+          'INSERT INTO share_photos (share_id, image_path, original_name) VALUES ($1, $2, $3)',
+          [share.id, result.url, result.original_name],
+        );
+      }),
     );
     const list = await _db.query(
       'SELECT * FROM share_photos WHERE share_id = $1',
@@ -155,8 +155,8 @@ exports.deleteShare = async (req, res) => {
   try {
     await Promise.all(
       images.map(async (image) => {
-        const publicId = 'poto/' + image.image_path.split('/').pop().split('.')[0];
-        console.info(publicId);
+        const publicId =
+          'poto/' + image.image_path.split('/').pop().split('.')[0];
         await uploader.destroy(publicId);
       }),
     );

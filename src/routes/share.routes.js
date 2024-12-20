@@ -2,7 +2,6 @@ const { Router } = require('express');
 const router = Router();
 const { authMiddleware } = require('../middlewares/auth.middleware');
 const multer = require('multer');
-const { storage } = require('../cloudinary');
 
 const {
   getList,
@@ -12,7 +11,7 @@ const {
   thumbShare,
 } = require('../controllers/share.controller');
 
-const upload = multer({ storage });
+const upload = multer();
 
 router.get('/', authMiddleware, getList);
 
