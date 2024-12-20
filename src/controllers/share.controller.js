@@ -1,4 +1,5 @@
 const fs = require('fs');
+const { uploader } = require('../cloudinary');
 const blockStoragePath = process.env.BLOCK_STORAGE_PATH;
 
 exports.getList = async (req, res) => {
@@ -42,7 +43,7 @@ exports.getItem = async (req, res) => {
     const row = rows[0];
 
     const images = await _db.query(
-      `SELECT * FROM share_photos WHERE shareId = $1`,
+      `SELECT * FROM share_photos WHERE share_id = $1`,
       [id],
     );
 
@@ -56,7 +57,6 @@ exports.getItem = async (req, res) => {
         ...row,
         images: images.map((image) => ({
           ...image,
-          imagePath: process.env.HOST + '/static/' + image.imageName,
         })),
       },
     });
@@ -71,33 +71,6 @@ exports.getItem = async (req, res) => {
 };
 
 exports.createShare = async (req, res) => {
-  const files = req.files.map((file, i) => {
-    const filename =
-      '' +
-      new Date().getTime() +
-      i +
-      file.originalname.substring(file.originalname.lastIndexOf('.'));
-    return {
-      filename: filename,
-      originalName: Buffer.from(file.originalname, 'latin1').toString('utf-8'),
-      tempPath: file.path,
-      targetPath: path.join(blockStoragePath, filename),
-    };
-  });
-
-  try {
-    files.forEach((file) => {
-      fs.renameSync(file.tempPath, file.targetPath);
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).send({
-      success: false,
-      message: '파일 업로드에 실패하였습니다.',
-    });
-    return;
-  }
-
   let share;
   let id = Math.random().toString(36).slice(-10);
   try {
@@ -116,16 +89,16 @@ exports.createShare = async (req, res) => {
   let photos;
   try {
     await Promise.all(
-      files.map(
-        async (file, i) =>
+      req.files.map(
+        async (file) =>
           await _db.execute(
-            'INSERT INTO share_photos (shareId, imageName, originalName) VALUES ($1, $2, $3)',
-            [share.id, file.filename, file.originalName],
+            'INSERT INTO share_photos (share_id, image_path, original_name) VALUES ($1, $2, $3)',
+            [share.id, file.path, file.originalname],
           ),
       ),
     );
     const list = await _db.query(
-      'SELECT * FROM article_photos WHERE articleId = $1',
+      'SELECT * FROM share_photos WHERE share_id = $1',
       [share.id],
     );
     photos = list;
@@ -150,11 +123,13 @@ exports.createShare = async (req, res) => {
 exports.deleteShare = async (req, res) => {
   const id = req.params.id;
 
+  let share;
   try {
     const rows = await _db.query('SELECT * FROM shares WHERE id = $1', [id]);
     if (rows.length === 0) {
       throw new Error();
     }
+    share = rows[0];
   } catch (err) {
     console.info(err);
     res.json({
@@ -164,8 +139,38 @@ exports.deleteShare = async (req, res) => {
     return;
   }
 
+  let images;
+  try {
+    images = await _db.query('SELECT * FROM share_photos WHERE share_id = $1', [
+      share.id,
+    ]);
+  } catch (err) {
+    console.info(err);
+    res.json({
+      success: false,
+      message: '이미지 파일을 불러오는 데에 실패했습니다.',
+    });
+  }
+
+  try {
+    await Promise.all(
+      images.map(async (image) => {
+        const publicId = 'poto/' + image.image_path.split('/').pop().split('.')[0];
+        console.info(publicId);
+        await uploader.destroy(publicId);
+      }),
+    );
+  } catch (err) {
+    console.info(err);
+    res.json({
+      success: false,
+      message: '이미지 파일을 삭제하는 데에 실패했습니다.',
+    });
+  }
+
   try {
     await _db.query('DELETE FROM shares WHERE id = $1', [id]);
+    await _db.query('DELETE FROM share_photos WHERE share_id = $1', [id]);
   } catch (err) {
     console.info(err);
     res.json({
@@ -182,11 +187,11 @@ exports.deleteShare = async (req, res) => {
 
 exports.thumbShare = async (req, res) => {
   const id = req.params.id;
-  const { id: imageId, isPass } = req.body;
+  const { id: imageId, is_pass } = req.body;
 
   try {
     const rows = await _db.query(
-      'SELECT * FROM share_photos WHERE id = $1 AND shareId = $2',
+      'SELECT * FROM share_photos WHERE id = $1 AND share_id = $2',
       [imageId, id],
     );
     if (rows.length === 0) {
@@ -202,8 +207,8 @@ exports.thumbShare = async (req, res) => {
   }
 
   try {
-    await _db.query('UPDATE share_photos SET isPass = ? WHERE id = ?', [
-      isPass,
+    await _db.query('UPDATE share_photos SET is_pass = $1 WHERE id = $2', [
+      is_pass,
       imageId,
     ]);
   } catch (err) {

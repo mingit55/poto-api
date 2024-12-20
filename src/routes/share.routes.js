@@ -2,7 +2,7 @@ const { Router } = require('express');
 const router = Router();
 const { authMiddleware } = require('../middlewares/auth.middleware');
 const multer = require('multer');
-const path = require('path');
+const { storage } = require('../cloudinary');
 
 const {
   getList,
@@ -12,7 +12,7 @@ const {
   thumbShare,
 } = require('../controllers/share.controller');
 
-const upload = multer({ dest: path.resolve(__srcname + '/uploads') });
+const upload = multer({ storage });
 
 router.get('/', authMiddleware, getList);
 
