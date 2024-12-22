@@ -8,10 +8,9 @@ const path = require('path');
 __srcname = path.resolve(__dirname);
 
 const app = express();
-app.use(bodyParser.json());
-
-// const blockStoragePath = process.env.BLOCK_STORAGE_PATH;
-// app.use("/static", express.static(blockStoragePath));
+app.use(bodyParser.json({
+  limit: '2000mb',
+}));
 
 const middleware = require("./middlewares");
 middleware.init(app);
