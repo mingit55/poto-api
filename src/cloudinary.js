@@ -15,8 +15,6 @@ module.exports = {
           {
             folder: 'poto',
             allowed_formats: ['jpeg', 'png', 'jpg'],
-            min_width: 200,
-            max_width: 1000,
           },
           async (error, result) => {
             if (error) {
