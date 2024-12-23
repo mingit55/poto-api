@@ -10,7 +10,7 @@ exports.getList = async (req, res) => {
 
   try {
     const rows = await _db.query(
-      `SELECT * FROM shares ORDER BY id DESC LIMIT ${pageSize} OFFSET ${startIdx}`,
+      `SELECT row_number() over(order by created_at) no, id, created_at FROM shares ORDER BY no DESC LIMIT ${pageSize} OFFSET ${startIdx}`,
     );
     const cntRows = await _db.query('SELECT COUNT(*) as cnt FROM shares');
 
