@@ -43,7 +43,7 @@ exports.getItem = async (req, res) => {
     const row = rows[0];
 
     const images = await _db.query(
-      `SELECT * FROM share_photos WHERE share_id = $1`,
+      `SELECT * FROM share_photos WHERE share_id = $1 ORDER BY original_name ASC`,
       [id],
     );
 
