@@ -10,7 +10,12 @@ exports.getList = async (req, res) => {
 
   try {
     const rows = await _db.query(
-      `SELECT row_number() over(order by created_at) no, id, created_at FROM shares ORDER BY no DESC LIMIT ${pageSize} OFFSET ${startIdx}`,
+      `SELECT 
+        row_number() over(order by created_at) no, 
+        id, 
+        title,
+        created_at 
+      FROM shares ORDER BY no DESC LIMIT ${pageSize} OFFSET ${startIdx}`,
     );
     const cntRows = await _db.query('SELECT COUNT(*) as cnt FROM shares');
 
@@ -73,8 +78,9 @@ exports.getItem = async (req, res) => {
 exports.createShare = async (req, res) => {
   let share;
   let id = Math.random().toString(36).slice(-10);
+  let title = req.body.title;
   try {
-    await _db.execute('INSERT INTO shares (id) VALUES ($1)', [id]);
+    await _db.execute('INSERT INTO shares (id, title) VALUES ($1, $2)', [id, title]);
 
     [share] = await _db.query('SELECT * FROM shares WHERE id = $1', [id]);
   } catch (err) {
