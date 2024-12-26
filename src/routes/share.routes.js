@@ -17,7 +17,7 @@ router.get('/', authMiddleware, getList);
 
 router.get('/:id', getItem);
 
-router.post('/', authMiddleware, upload.array('images', 300), createShare);
+router.post('/', authMiddleware, upload.array('images', 1000), createShare);
 
 router.delete('/:id', authMiddleware, deleteShare);
 
