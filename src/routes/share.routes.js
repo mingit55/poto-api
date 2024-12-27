@@ -9,6 +9,7 @@ const {
   createShare,
   deleteShare,
   thumbShare,
+  createSharePhoto,
 } = require('../controllers/share.controller');
 
 const upload = multer();
@@ -17,7 +18,14 @@ router.get('/', authMiddleware, getList);
 
 router.get('/:id', getItem);
 
-router.post('/', authMiddleware, upload.array('images', 1000), createShare);
+router.post('/', authMiddleware, createShare);
+
+router.post(
+  '/:id/photos',
+  authMiddleware,
+  upload.array('images', 100),
+  createSharePhoto,
+);
 
 router.delete('/:id', authMiddleware, deleteShare);
 

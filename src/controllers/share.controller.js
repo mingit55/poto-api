@@ -1,6 +1,5 @@
 const fs = require('fs');
 const { uploader, upload } = require('../cloudinary');
-const blockStoragePath = process.env.BLOCK_STORAGE_PATH;
 
 exports.getList = async (req, res) => {
   let page = parseInt((req.query.page || '1').replace(/\D/, ''));
@@ -41,7 +40,17 @@ exports.getItem = async (req, res) => {
   let id = req.params.id;
 
   try {
-    const rows = await _db.query(`SELECT * FROM shares WHERE id = $1`, [id]);
+    const rows = await _db.query(
+      `
+      SELECT S.*, C.total_count, G.good_count, B.bad_count
+      FROM shares S,
+        (SELECT COUNT(*) AS total_count FROM share_photos WHERE share_id = $1) C,
+        (SELECT COUNT(*) AS good_count FROM share_photos WHERE share_id = $1 AND is_pass = 2) G,
+        (SELECT COUNT(*) AS bad_count FROM share_photos WHERE share_id = $1 AND is_pass = 1) B
+      WHERE id = $1
+      `,
+      [id],
+    );
     if (!rows || rows.length === 0) {
       throw new Error();
     }
@@ -80,7 +89,10 @@ exports.createShare = async (req, res) => {
   let id = Math.random().toString(36).slice(-10);
   let title = req.body.title;
   try {
-    await _db.execute('INSERT INTO shares (id, title) VALUES ($1, $2)', [id, title]);
+    await _db.execute('INSERT INTO shares (id, title) VALUES ($1, $2)', [
+      id,
+      title,
+    ]);
 
     [share] = await _db.query('SELECT * FROM shares WHERE id = $1', [id]);
   } catch (err) {
@@ -92,17 +104,46 @@ exports.createShare = async (req, res) => {
     return;
   }
 
+  res.json({
+    success: true,
+    message: '게시물 작성 성공',
+    data: share,
+  });
+};
+
+exports.createSharePhoto = async (req, res) => {
+  const id = req.params.id;
+  let share;
+  try {
+    const rows = await _db.query('SELECT * FROM shares WHERE id = $1', [id]);
+    if (rows.length === 0) {
+      throw new Error();
+    }
+    share = rows[0];
+  } catch (err) {
+    console.info(err);
+    res.json({
+      success: false,
+      message: '해당 공유 링크를 찾을 수 없습니다.',
+    });
+    return;
+  }
+
   let photos;
   try {
-    await Promise.all(
-      req.files.map(async (file) => {
-        const result = await upload(file);
-        await _db.execute(
-          'INSERT INTO share_photos (share_id, image_path, original_name) VALUES ($1, $2, $3)',
-          [share.id, result.url, result.original_name],
-        );
-      }),
-    );
+    for (let i = 0; i < req.files.length; i += 10) {
+      console.info(`${i + 1} ~ ${i + 10} 이미지 업로드 중`);
+      let files = Array.from(req.files).slice(i, i + 10);
+      await Promise.all(
+        files.map(async (file) => {
+          const result = await upload(file);
+          await _db.execute(
+            'INSERT INTO share_photos (share_id, image_path, original_name) VALUES ($1, $2, $3)',
+            [share.id, result.url, result.original_name],
+          );
+        }),
+      );
+    }
     const list = await _db.query(
       'SELECT * FROM share_photos WHERE share_id = $1',
       [share.id],
@@ -117,12 +158,10 @@ exports.createShare = async (req, res) => {
     return;
   }
 
-  share.photos = photos;
-
   res.json({
     success: true,
-    message: '게시물 작성 성공',
-    data: share,
+    message: '게시물 이미지 작성 성공',
+    data: photos,
   });
 };
 
@@ -159,13 +198,15 @@ exports.deleteShare = async (req, res) => {
   }
 
   try {
-    await Promise.all(
-      images.map(async (image) => {
-        const publicId =
-          'poto/' + image.image_path.split('/').pop().split('.')[0];
-        await uploader.destroy(publicId);
-      }),
-    );
+    for (let i = 0; i < images.length; i += 10) {
+      await Promise.all(
+        images.slice(i, i + 10).map(async (image) => {
+          const publicId =
+            'poto/' + image.image_path.split('/').pop().split('.')[0];
+          await uploader.destroy(publicId);
+        }),
+      );
+    }
   } catch (err) {
     console.info(err);
     res.json({
