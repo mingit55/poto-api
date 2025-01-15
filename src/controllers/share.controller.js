@@ -1,4 +1,3 @@
-const fs = require('fs');
 const { uploader, upload } = require('../cloudinary');
 
 exports.getList = async (req, res) => {

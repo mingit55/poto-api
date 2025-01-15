@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 exports.authMiddleware = (req, res, next) => {
   const token = req.cookies["ACCESS_TOKEN"];
   if (!token) {
-    return res.json({ success: false, message: "Token not found" });
+    return res.json({ success: false, message: "로그인 정보가 없습니다." });
   }
   const check = new Promise((res, rej) => {
     jwt.verify(token, process.env.JWT_SECRET, (err, payload) => {
