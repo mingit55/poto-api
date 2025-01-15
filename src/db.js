@@ -16,7 +16,7 @@ module.exports = {
     // })
 
     global._db = {
-      async query() {
+      async query(sql, data, options = {}) {
         // const conn = await  _dbpool.getConnection();
         // const result = conn.query(...arguments);
         // conn.release();
@@ -29,8 +29,13 @@ module.exports = {
           },
         });
         client.connect();
-        const res = await client.query(...arguments);
+        const res = await client.query(sql, data);
         client.end();
+
+        if (options.raw) {
+          return res;
+        }
+
         return res.rows;
       },
       async execute() {

@@ -200,8 +200,7 @@ exports.deleteShare = async (req, res) => {
     for (let i = 0; i < images.length; i += 10) {
       await Promise.all(
         images.slice(i, i + 10).map(async (image) => {
-          const publicId =
-            'poto/' + image.image_path.split('/').pop().split('.')[0];
+          const publicId = getPublicId(image.image_path);
           await uploader.destroy(publicId);
         }),
       );

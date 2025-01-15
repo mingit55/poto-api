@@ -8,6 +8,8 @@ cloudinary.config({
 
 module.exports = {
   uploader: cloudinary.uploader,
+  getPublicId: (imagePath) =>
+    'poto/' + imagePath.split('/').pop().split('.')[0],
   upload: (file) => {
     return new Promise((resolve, reject) => {
       cloudinary.uploader
