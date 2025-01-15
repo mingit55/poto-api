@@ -8,6 +8,7 @@ exports.getList = async (req, res) => {
         row_number() over(order by created_at) no, 
         id, title, created_at 
         FROM dev_blog_articles 
+        ORDER BY created_at DESC
         LIMIT $1 OFFSET $2`,
       [pageSize, startIdx],
     );
@@ -156,11 +157,10 @@ exports.updateArticle = async (req, res) => {
   }
 
   try {
-    const res = await _db.query(
+    await _db.query(
       'UPDATE dev_blog_articles set title = $1, content = $2 WHERE id = $3',
       [title, content, id],
     );
-    console.info(res);
   } catch (err) {
     console.error(err);
 
@@ -212,7 +212,7 @@ exports.deleteArticle = async (req, res) => {
   }
 
   try {
-    _db.query('DELETE FROM dev_blog_articles WHERE id = $1', [id]);
+    await _db.query('DELETE FROM dev_blog_articles WHERE id = $1', [id]);
   } catch (err) {
     console.error(err);
     res.status(500).json({
